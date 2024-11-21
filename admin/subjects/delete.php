@@ -1,5 +1,5 @@
 <?php 
-include '../../functions.php';  // Make sure to include the file with the necessary functions
+include '../../functions.php';  // Ensure the correct path to functions.php is included
 
 // Get the subject ID from the URL
 if (isset($_GET['subject_id'])) {
@@ -18,18 +18,6 @@ if (isset($_POST['delete_subject'])) {
     exit();
 }
 
-// Function to fetch the subject data by ID (for confirmation)
-function getSubjectById($subjectId) {
-    $conn = openCon();
-    $sql = "SELECT * FROM subjects WHERE id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $subjectId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $subject = $result->fetch_assoc();
-    closeCon($conn);
-    return $subject;
-}
 ?>
 
 <?php include '../partials/header.php'; ?>

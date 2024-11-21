@@ -1,3 +1,32 @@
+<?php 
+include '../partials/header.php';
+include '../partials/side-bar.php';
+include '../../functions.php';  // Ensure this file contains your functions
+
+// Get the subject_id from the URL parameter
+if (isset($_GET['subject_id'])) {
+    $subjectId = $_GET['subject_id'];
+    
+    // Fetch the subject data using the subject_id
+    $subject = getSubjectById($subjectId);
+}
+
+// Handle form submission for updating the subject name only
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $subjectId = $_POST['subject_id'];  // Get the subject ID
+    $subjectName = $_POST['subject_name'];  // Get the new subject name
+
+    // Update the subject name in the database
+    if (updateSubjectName($subjectId, $subjectName)) {
+        // Stay on the same page and show updated data
+        header("Location: add.php?subject_id=" . $subjectId);
+        exit;
+    } else {
+        echo "Error updating subject name!";
+    }
+}
+
+?>
 <html>
 <head>
     <title>Edit Subject</title>
@@ -68,17 +97,23 @@
         <div class="breadcrumb">
             <a href="#">Dashboard</a> / <a href="#">Add Subject</a> / Edit Subject
         </div>
-        <form>
+        
+        <?php if ($subject): ?>
+        <form method="POST">
             <div class="form-group">
-                <label for="subject-id">Subject ID</label>
-                <input type="text" id="subject-id" value="1001" readonly>
+                <label for="subject-code">Subject Code</label>
+                <input type="text" id="subject-code" name="subject_code" value="<?= $subject['subject_code'] ?>" readonly>
             </div>
             <div class="form-group">
                 <label for="subject-name">Subject Name</label>
-                <input type="text" id="subject-name" value="Mathematics">
+                <input type="text" id="subject-name" name="subject_name" value="<?= $subject['subject_name'] ?>" required>
             </div>
-            <button type="submit" class="btn">Update Subject</button>
+            <input type="hidden" name="subject_id" value="<?= $subject['id'] ?>">
+            <button type="submit" class="btn">Update Subject Name</button>
         </form>
+        <?php else: ?>
+            <p>Subject not found.</p>
+        <?php endif; ?>
     </div>
 </body>
 </html>
