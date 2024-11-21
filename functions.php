@@ -39,7 +39,11 @@ function loginUser($username, $password) {
             $stmt->close();
             closeCon($conn);
             return true;
+        } else {
+            debugLog("Incorrect password for user: " . $username);
         }
+    } else {
+        debugLog("No user found with email: " . $username);
     }
 
     $stmt->close();
@@ -51,40 +55,22 @@ function isLoggedIn() {
     return isset($_SESSION['email']);
 }
 
-function addUser($email, $password, $name) {
-    $conn = openCon();
-
-    if ($conn) {
-        // Hash the password before storing it
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-        // Insert the user into the database
-        $sql = "INSERT INTO users (email, password, name) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sss", $email, $hashedPassword, $name);
-
-        if ($stmt->execute()) {
-            echo "New record created successfully";
-        } else {
-            echo "Error: " . $stmt->error;
-        }
-
-        $stmt->close();
-        closeCon($conn);
-    } else {
-        echo "Failed to connect to the database.";
-    }
-}
 function addSubject($subjectCode, $subjectName) {
     $conn = openCon();
 
     // Prepare the SQL statement to insert the new subject
     $sql = "INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
+
+    // Check if the statement was prepared correctly
+    if ($stmt === false) {
+        debugLog("Error preparing SQL statement: " . $conn->error);
+        return;
+    }
+
     $stmt->bind_param("ss", $subjectCode, $subjectName);
 
     if ($stmt->execute()) {
-        // If successful, log the message and close the connection
         debugLog("Subject added successfully: $subjectCode - $subjectName");
     } else {
         debugLog("Error adding subject: " . $stmt->error);
@@ -107,11 +93,52 @@ function getSubjects() {
         while ($row = $result->fetch_assoc()) {
             $subjects[] = $row;
         }
+    } else {
+        debugLog("No subjects found in the database.");
     }
-    
+
     closeCon($conn);
     return $subjects;
 }
+
+function getSubjectById($id) {
+    $conn = openCon();
+    $sql = "SELECT * FROM subjects WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $subject = null;
+    if ($result->num_rows > 0) {
+        $subject = $result->fetch_assoc();
+    }
+
+    $stmt->close();
+    closeCon($conn);
+    return $subject;
+}
+
+function updateSubjectName($id, $subjectName) {
+    $conn = openCon();
+    $sql = "UPDATE subjects SET subject_name = ? WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $subjectName, $id);
+    
+    if ($stmt->execute()) {
+        debugLog("Subject with ID $id updated successfully to $subjectName.");
+        $stmt->close();
+        closeCon($conn);
+        return true;
+    } else {
+        debugLog("Error updating subject with ID $id: " . $stmt->error);
+    }
+
+    $stmt->close();
+    closeCon($conn);
+    return false;
+}
+
 function deleteSubject($subjectId) {
     $conn = openCon();
 
@@ -123,7 +150,7 @@ function deleteSubject($subjectId) {
     if ($stmt->execute()) {
         debugLog("Subject with ID $subjectId deleted successfully.");
     } else {
-        debugLog("Error deleting subject: " . $stmt->error);
+        debugLog("Error deleting subject with ID $subjectId: " . $stmt->error);
     }
 
     $stmt->close();

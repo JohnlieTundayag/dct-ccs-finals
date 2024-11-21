@@ -1,7 +1,7 @@
 <?php 
 include '../partials/header.php';
 include '../partials/side-bar.php';
-include '../../functions.php';  // Make sure to include the file that contains your functions
+include '../../functions.php';  // Include the functions file
 
 // Handle form submission for adding a new subject
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -15,11 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Fetch all subjects
 $subjects = getSubjects();
 ?>
+
 <html>
 <head>
     <title>Add a New Subject</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        /* Styling for the page */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -91,10 +93,10 @@ $subjects = getSubjects();
             cursor: pointer;
         }
         .table-container .btn-edit {
-            background-color: #17a2b8;
+            background-color: #ff00b3; /* Magenta color */
         }
         .table-container .btn-delete {
-            background-color: #dc3545;
+            background-color: #dc3545; /* Red color for delete */
         }
     </style>
 </head>
@@ -127,11 +129,13 @@ $subjects = getSubjects();
                     // Loop through subjects and display them in the table
                     if ($subjects) {
                         foreach ($subjects as $subject) {
-                            // Corrected the issue with quotes in the href attribute
                             echo "<tr>
                                 <td>{$subject['subject_code']}</td>
                                 <td>{$subject['subject_name']}</td>
                                 <td>
+                                    <a href='edit.php?subject_id={$subject['id']}'>
+                                        <button class='btn btn-edit'>Edit</button>
+                                    </a>
                                     <a href='delete.php?subject_id={$subject['id']}'>
                                         <button class='btn btn-delete'>Delete</button>
                                     </a>
@@ -148,4 +152,3 @@ $subjects = getSubjects();
     </div>
 </body>
 </html>
- 
