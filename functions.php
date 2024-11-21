@@ -112,5 +112,21 @@ function getSubjects() {
     closeCon($conn);
     return $subjects;
 }
+function deleteSubject($subjectId) {
+    $conn = openCon();
 
+    // Prepare the SQL statement to delete the subject by ID
+    $sql = "DELETE FROM subjects WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $subjectId);
+
+    if ($stmt->execute()) {
+        debugLog("Subject with ID $subjectId deleted successfully.");
+    } else {
+        debugLog("Error deleting subject: " . $stmt->error);
+    }
+
+    $stmt->close();
+    closeCon($conn);
+}
 ?>
