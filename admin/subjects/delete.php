@@ -1,7 +1,40 @@
 <?php 
-include '../partials/header.php';
-include '../partials/side-bar.php';
+include '../../functions.php';  // Make sure to include the file with the necessary functions
+
+// Get the subject ID from the URL
+if (isset($_GET['subject_id'])) {
+    $subjectId = $_GET['subject_id'];
+
+    // Fetch subject details based on the subject_id for confirmation display
+    $subject = getSubjectById($subjectId);
+}
+
+// Handle deletion if the "Delete Subject Record" button is clicked
+if (isset($_POST['delete_subject'])) {
+    $subjectId = $_POST['subject_id'];
+    deleteSubject($subjectId);
+    // Redirect back to the add.php page after deletion
+    header("Location: add.php");
+    exit();
+}
+
+// Function to fetch the subject data by ID (for confirmation)
+function getSubjectById($subjectId) {
+    $conn = openCon();
+    $sql = "SELECT * FROM subjects WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $subjectId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $subject = $result->fetch_assoc();
+    closeCon($conn);
+    return $subject;
+}
 ?>
+
+<?php include '../partials/header.php'; ?>
+<?php include '../partials/side-bar.php'; ?>
+
 <html>
 <head>
     <title>Delete Subject</title>
@@ -17,7 +50,7 @@ include '../partials/side-bar.php';
             width: 80%;
             margin: 50px auto;
             background-color: #fff;
-            padding: 20px;
+            padding: 0px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
@@ -38,6 +71,11 @@ include '../partials/side-bar.php';
         h1 {
             font-size: 24px;
             margin-bottom: 20px;
+        }
+        .inner-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
         }
         .confirmation {
             font-size: 16px;
@@ -80,23 +118,35 @@ include '../partials/side-bar.php';
     </style>
 </head>
 <body>
-<h1>Delete Subject</h1>
-<div class="breadcrumb">
+    <div class="container">
+        <div class="breadcrumb">
             <a href="#">Dashboard</a> / <a href="#">Add Subject</a> / <span>Delete Subject</span>
         </div>
-    <div class="container">
-        
-        
-        <div class="confirmation">
-            <p>Are you sure you want to delete the following subject record?</p>
-            <ul>
-                <li>Subject Code: 1001</li>
-                <li>Subject Name: English</li>
-            </ul>
-        </div>
-        <div class="buttons">
-            <button class="cancel">Cancel</button>
-            <button class="delete">Delete Subject Record</button>
+        <h1>Delete Subject</h1>
+        <div class="inner-container">
+            <?php if (isset($subject)): ?>
+                <div class="confirmation">
+                    <p>Are you sure you want to delete the following subject record?</p>
+                    <ul>
+                        <li>Subject Code: <?php echo $subject['subject_code']; ?></li>
+                        <li>Subject Name: <?php echo $subject['subject_name']; ?></li>
+                    </ul>
+                </div>
+                <form method="POST">
+                    <!-- Hidden input to pass the subject_id for deletion -->
+                    <input type="hidden" name="subject_id" value="<?php echo $subject['id']; ?>">
+                    <div class="buttons">
+                        <!-- Cancel button: Redirect back to add.php -->
+                        <a href="add.php">
+                            <button type="button" class="cancel">Cancel</button>
+                        </a>
+                        <!-- Delete button: Trigger the subject deletion -->
+                        <button type="submit" name="delete_subject" class="delete">Delete Subject Record</button>
+                    </div>
+                </form>
+            <?php else: ?>
+                <p>Subject not found!</p>
+            <?php endif; ?>
         </div>
     </div>
 </body>

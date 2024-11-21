@@ -127,14 +127,16 @@ $subjects = getSubjects();
                     // Loop through subjects and display them in the table
                     if ($subjects) {
                         foreach ($subjects as $subject) {
+                            // Corrected the issue with quotes in the href attribute
                             echo "<tr>
-                                    <td>{$subject['subject_code']}</td>
-                                    <td>{$subject['subject_name']}</td>
-                                    <td>
-                                        <button class='btn btn-edit'>Edit</button>
+                                <td>{$subject['subject_code']}</td>
+                                <td>{$subject['subject_name']}</td>
+                                <td>
+                                    <a href='delete.php?subject_id={$subject['id']}'>
                                         <button class='btn btn-delete'>Delete</button>
-                                    </td>
-                                  </tr>";
+                                    </a>
+                                </td>
+                            </tr>";
                         }
                     } else {
                         echo "<tr><td colspan='3'>No subjects available</td></tr>";
@@ -146,3 +148,4 @@ $subjects = getSubjects();
     </div>
 </body>
 </html>
+ 
