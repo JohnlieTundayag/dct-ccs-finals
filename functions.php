@@ -75,4 +75,42 @@ function addUser($email, $password, $name) {
         echo "Failed to connect to the database.";
     }
 }
+function addSubject($subjectCode, $subjectName) {
+    $conn = openCon();
+
+    // Prepare the SQL statement to insert the new subject
+    $sql = "INSERT INTO subjects (subject_code, subject_name) VALUES (?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $subjectCode, $subjectName);
+
+    if ($stmt->execute()) {
+        // If successful, log the message and close the connection
+        debugLog("Subject added successfully: $subjectCode - $subjectName");
+    } else {
+        debugLog("Error adding subject: " . $stmt->error);
+    }
+
+    $stmt->close();
+    closeCon($conn);
+}
+
+function getSubjects() {
+    $conn = openCon();
+    
+    // SQL query to get all subjects
+    $sql = "SELECT * FROM subjects";
+    $result = $conn->query($sql);
+    
+    // Fetch all subjects as an associative array
+    $subjects = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $subjects[] = $row;
+        }
+    }
+    
+    closeCon($conn);
+    return $subjects;
+}
+
 ?>
